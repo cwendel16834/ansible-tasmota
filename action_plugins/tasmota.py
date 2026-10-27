@@ -100,6 +100,9 @@ class ActionModule(ActionBase):
         # Enable retries due to reboot of the devices
         session = requests.Session()
         session.mount("http://%s" % tasmota_host, HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1.0)))
+        # Tasmota 16 drops /cm requests without a Referer matching the device
+        # (web referrer check). Older releases ignore the header.
+        session.headers.update({'Referer': "http://%s/" % tasmota_host})
 
         endpoint_uri = "http://%s/cm" % tasmota_host
         status_params = copy.deepcopy(auth_params)
